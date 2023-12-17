@@ -1,10 +1,8 @@
 package com.interpreter.lox;
+
 import com.interpreter.lox.lexer.Scanner;
 import com.interpreter.lox.lexer.Token;
-import com.interpreter.lox.lexer.TokenType;
-import com.interpreter.lox.parser.ASTPrinter;
-import com.interpreter.lox.parser.Expr;
-import com.interpreter.lox.parser.Parser;
+import com.interpreter.lox.parser.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,6 +17,9 @@ import static com.interpreter.lox.lexer.TokenType.EOF;
 
 public class Lox {
     static boolean hadError = false;
+    static boolean hadRuntimeError = false;
+
+    private static final Interpreter interpreter = new Interpreter();
 
     public static void main(String[] args) throws IOException {
         if (args.length > 2) {
@@ -61,30 +62,39 @@ public class Lox {
     private static void run(String source) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
+
         Parser parser = new Parser(tokens);
         Expr expression = parser.parse();
 
-        if(hadError) return;
+        if (hadError)
+            return;
+        interpreter.interpret(expression);
 
-        System.out.println(new ASTPrinter().print(expression));
+        if (hadRuntimeError)
+            System.exit(70);
+        // System.out.println(new ASTPrinter().print(expression));
     }
 
     public static void error(int line, String message) {
         report(line, "", message);
     }
 
-    public static void  error(Token token, String message) {
-        if(token.type == EOF) {
+    public static void error(Token token, String message) {
+        if (token.type == EOF) {
             report(token.line, " at end", message);
         } else {
-            report(token.line, " at '" +token.lexeme + "'", message);
+            report(token.line, " at '" + token.lexeme + "'", message);
         }
+    }
+
+    public static void runtimeError(RuntimeError error) {
+        System.err.println(error.getMessage() + "\n[line " + error.token.line + "]");
+        hadRuntimeError = true;
     }
 
     private static void report(int line, String where, String message) {
         System.err.println("[line " + line + "] Error" + where + ": " + message);
         hadError = true;
     }
-
 
 }

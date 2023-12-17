@@ -204,9 +204,4 @@ public class Scanner {
         current++;
         return true;
     }
-
-
-
-
-
 }

@@ -17,6 +17,8 @@ public class Parser {
         this.tokens = tokens;
     }
 
+    // TODO: Add support for ternary operator (?:)
+
     public Expr parse() {
         try {
             return expression();
@@ -25,8 +27,7 @@ public class Parser {
         }
     }
 
-    private Expr expression() {
-        return equality();
+    private Expr expression() { return equality();
     }
 
     // Rule: equality -> comparison (("==" | "!=") comparison)*
@@ -89,6 +90,9 @@ public class Parser {
             Token operator = previous();
             Expr right = unary();
             return  new Expr.Unary(operator, right);
+        }
+        else if(match(STAR, SLASH, PLUS)) {
+            throw error(previous(), "Expected left Hand side of the Binary operator");
         }
 
         return primary();
