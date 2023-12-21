@@ -3,14 +3,21 @@ package com.interpreter.lox.parser;
 import com.interpreter.lox.Lox;
 import com.interpreter.lox.lexer.Token;
 
-public class Interpreter implements Expr.Visitor<Object>{
-    public void interpret(Expr expr) {
+import java.util.List;
+
+public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+    public void interpret(List<Stmt> statements) {
         try {
-            Object value = evaluate(expr);
-            System.out.println(stringify(value));
+            for(Stmt stmt: statements) {
+                execute(stmt);
+            }
         } catch (RuntimeError error) {
             Lox.runtimeError(error);
         }
+    }
+
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
     }
 
     private String stringify(Object value) {
@@ -121,5 +128,20 @@ public class Interpreter implements Expr.Visitor<Object>{
 
     private Object evaluate(Expr expression) {
         return expression.accept(this);
+    }
+
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+    }
+
+
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+        Object value = evaluate(stmt.expression);
+        System.out.println(stringify(value));
+
+        return null;
     }
 }

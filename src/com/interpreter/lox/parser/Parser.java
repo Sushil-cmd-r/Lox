@@ -4,6 +4,7 @@ import com.interpreter.lox.Lox;
 import com.interpreter.lox.lexer.Token;
 import com.interpreter.lox.lexer.TokenType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.interpreter.lox.lexer.TokenType.*;
@@ -19,12 +20,34 @@ public class Parser {
 
     // TODO: Add support for ternary operator (?:)
 
-    public Expr parse() {
-        try {
-            return expression();
-        } catch (ParseError error) {
-            return null;
+    public List<Stmt> parse() {
+        List<Stmt> statements = new ArrayList<>();
+
+        while(!isAtEnd()) {
+            statements.add(statement());
         }
+
+        return statements;
+    }
+
+    private Stmt statement() {
+        if(match(PRINT)) return printStatement();
+
+        return expressionStatement();
+    }
+
+    private Stmt printStatement() {
+        Expr value = expression();
+        consume(SEMICOLON, "Expected ';' after statement");
+
+        return new Stmt.Print(value);
+    }
+
+    private Stmt expressionStatement() {
+        Expr expr = expression();
+        consume(SEMICOLON, "Expected ';' after statement");
+
+        return new Stmt.Expression(expr);
     }
 
     private Expr expression() { return equality();
