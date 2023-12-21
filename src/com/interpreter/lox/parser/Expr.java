@@ -2,12 +2,30 @@ package com.interpreter.lox.parser;
 
 import com.interpreter.lox.lexer.Token;
 
+import java.util.List;
+
 public abstract class Expr {
     public interface Visitor<R> {
+        R visitAssignExpr(Assign expr);
         R visitBinaryExpr(Binary expr);
         R visitGroupingExpr(Grouping expr);
         R visitLiteralExpr(Literal expr);
         R visitUnaryExpr(Unary expr);
+        R visitVariableExpr(Variable expr);
+    }
+    public static class Assign extends Expr {
+        Assign(Token name, Expr value) {
+            this.name = name ; 
+            this.value = value ; 
+        }
+
+        public final Token name;
+        public final  Expr value;
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitAssignExpr(this);
+        }
     }
     public static class Binary extends Expr {
         Binary(Expr left, Token operator, Expr right) {
@@ -61,6 +79,18 @@ public abstract class Expr {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitUnaryExpr(this);
+        }
+    }
+    public static class Variable extends Expr {
+        Variable(Token name) {
+            this.name = name ; 
+        }
+
+        public final Token name;
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitVariableExpr(this);
         }
     }
 

@@ -1,14 +1,22 @@
 ## Grammar
 
-program -> statement* EOF
+program -> declarations* EOF
 
-statement -> exprStmt | printStmt
+declaration -> varDecl | statement
+
+varDecl -> "var" IDENTIFIER ("=" expression)? ";"
+
+statement -> exprStmt | printStmt | block
+
+block -> "{" declaration "}"
 
 exprStmt -> expression ";"
 
 printStmt -> "print" expression ";"
 
-expression -> equality
+expression -> assignment
+
+assignment -> IDENTIFIER "=" assignment | equality
 
 equality -> comparison (("==" | "!=") comparison)*
 
@@ -20,7 +28,7 @@ factor -> unary (("/" | "*") unary)*
 
 unary -> ("!" | "-") unary | primary
 
-primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
+primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER
 
 
 
