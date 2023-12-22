@@ -1,4 +1,4 @@
-package com.interpreter.lox.parser;
+package com.interpreter.lox.util;
 
 import com.interpreter.lox.lexer.Token;
 

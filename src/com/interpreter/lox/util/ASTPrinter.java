@@ -1,4 +1,6 @@
-package com.interpreter.lox.parser;
+package com.interpreter.lox.util;
+
+import com.interpreter.lox.parser.Expr;
 
 // TODO: Add support for statements as well, currently only supports expressions printing
 public class ASTPrinter implements Expr.Visitor<String> {
@@ -14,6 +16,11 @@ public class ASTPrinter implements Expr.Visitor<String> {
     @Override
     public String visitBinaryExpr(Expr.Binary expr) {
         return genTree(expr.operator.lexeme, expr.left, expr.right);
+    }
+
+    @Override
+    public String visitCallExpr(Expr.Call expr) {
+        return null;
     }
 
     @Override

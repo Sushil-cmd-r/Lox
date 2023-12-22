@@ -1,8 +1,10 @@
 package com.interpreter.lox;
 
+import com.interpreter.lox.interpreter.Interpreter;
 import com.interpreter.lox.lexer.Scanner;
 import com.interpreter.lox.lexer.Token;
 import com.interpreter.lox.parser.*;
+import com.interpreter.lox.util.RuntimeError;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,6 +1,7 @@
-package com.interpreter.lox.parser;
+package com.interpreter.lox.interpreter;
 
 import com.interpreter.lox.lexer.Token;
+import com.interpreter.lox.util.RuntimeError;
 
 import java.util.HashMap;
 import java.util.Map;
