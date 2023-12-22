@@ -5,6 +5,7 @@ import com.interpreter.lox.lexer.Token;
 import com.interpreter.lox.lexer.TokenType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.interpreter.lox.lexer.TokenType.*;
@@ -56,11 +57,80 @@ public class Parser {
     }
 
     private Stmt statement() {
+        if(match(FOR)) return forStatement();
+
+        if(match(IF)) return ifStatement();
+
         if(match(PRINT)) return printStatement();
+
+        if(match(WHILE)) return whileStatement();
 
         if(match(LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt forStatement() {
+        consume(LEFT_PAREN, "Expected '(' after 'for'");
+        Stmt initiailizer;
+        if(match(SEMICOLON)) {
+            initiailizer = null;
+        } else if(match(VAR)) {
+            initiailizer = varDeclaration();
+        } else {
+            initiailizer = expressionStatement();
+        }
+
+        Expr condition = null;
+        if(!check(SEMICOLON)) {
+            condition = expression();
+        }
+
+        consume(SEMICOLON, "Expected ';' after loop condition.");
+
+        Expr increment = null;
+        if (!check(RIGHT_PAREN)) {
+            increment = expression();
+        }
+        consume(RIGHT_PAREN, "Expected ')' after for clauses.");
+        Stmt body = statement();
+
+        if(increment != null) {
+            body = new Stmt.Block(Arrays.asList(body, new Stmt.Expression(increment)));
+        }
+
+        if(condition == null) condition = new Expr.Literal(true);
+        body = new Stmt.While(condition, body);
+
+        if(initiailizer != null) {
+            body = new Stmt.Block(Arrays.asList(initiailizer, body));
+        }
+
+        return body;
+    }
+
+    private Stmt whileStatement() {
+        consume(LEFT_PAREN, "Expected '(' after 'while'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expected ')' after while condition.");
+
+        Stmt body = statement();
+
+        return new Stmt.While(condition, body);
+    }
+
+    private Stmt ifStatement() {
+        consume(LEFT_PAREN, "Expected '(' after 'if'");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expected ')' after if condition");
+
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+        if(match(ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
     private Stmt printStatement() {
@@ -90,8 +160,8 @@ public class Parser {
     private Expr expression() { return assignment(); }
 
     private Expr assignment() {
-        // try to parse as equality
-        Expr expr = equality();
+        // try to parse as equality / logical operator
+        Expr expr = or();
 
         // if match EQUALITY means the above expr is an IDENTIFIER (Variable)
         if (match(EQUAL)) {
@@ -107,6 +177,30 @@ public class Parser {
             error(equals, "Invalid assignment target.");
         }
         // Just return the equality expression
+        return expr;
+    }
+
+    private Expr or() {
+        Expr expr = and();
+
+        while (match(OR)) {
+            Token operator = previous();
+            Expr right = and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr and() {
+        Expr expr = equality();
+
+        while (match(AND)) {
+            Token operator = previous();
+            Expr right = equality();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
         return expr;
     }
 

@@ -28,6 +28,11 @@ public class ASTPrinter implements Expr.Visitor<String> {
     }
 
     @Override
+    public String visitLogicalExpr(Expr.Logical expr) {
+        return null;
+    }
+
+    @Override
     public String visitUnaryExpr(Expr.Unary expr) {
         return genTree(expr.operator.lexeme, expr.right);
     }
